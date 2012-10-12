@@ -1,57 +1,35 @@
 package net.jingx.otpAuth.otp;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 
-import javax.swing.JLabel;
-import javax.swing.Timer;
+public class TimerNextKey implements Runnable {
 
-public class TimerNextKey extends Timer {
+	public static final int TIME = 1000;
+	private Shell shell;
+	private Label lblTimerDo;
+	private Listener execute;
+	private int counter;
 
-	private static final long serialVersionUID = 7015868851197079067L;
-	
-	private static int counter;
-	private JLabel lblTimersec;
-	
-	public TimerNextKey(JLabel lblTimersec, ActionListener actionToCall) {
-		super(1000, new Action(lblTimersec, actionToCall));
-		counter = PasscodeGenerator.INTERVAL;
-		this.lblTimersec = lblTimersec;
+	public TimerNextKey(Shell shell, Label lblTimerDo, Listener execute) {
+		this.shell = shell;
+		this.lblTimerDo = lblTimerDo;
+		this.execute = execute;
+		this.counter = PasscodeGenerator.INTERVAL;
+		lblTimerDo.setText(counter + " sec");
 	}
 
 	@Override
-	public void stop() {
-		super.stop();
-		lblTimersec.setText("");
-	}
-	
-	@Override
-	public void restart() {
-		super.restart();
-		counter = PasscodeGenerator.INTERVAL;
+	public void run() {
+		counter--;
+		lblTimerDo.setText(counter + " sec");
+		lblTimerDo.pack();
+		if (counter == 0) {
+			counter = PasscodeGenerator.INTERVAL;
+			execute.handleEvent(null);
+		}
+		shell.getDisplay().timerExec(TIME, this);
 	}
 
-	static class Action implements ActionListener {
-		private JLabel lblToUpdate;
-		private ActionListener actionToCall;
-		
-		public Action(JLabel lblToUpdate, ActionListener actionToCall){
-			this.lblToUpdate = lblToUpdate;
-			this.actionToCall = actionToCall;
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			counter--;
-			lblToUpdate.setText(counter + " sec");
-			if(counter==0){
-				actionToCall.actionPerformed(e);
-				counter = PasscodeGenerator.INTERVAL;
-				lblToUpdate.setText(counter + " sec");
-			}
-			
-		}
-		
-	}
-	
 }
